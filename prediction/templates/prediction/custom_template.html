@@ -1,0 +1,507 @@
+<html><head><base href="https://taichung-housing-prediction.ai/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>台中市南區房價預測 - 智能科技版</title><style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+  
+  body, html {
+    font-family: 'Roboto', sans-serif;
+    background-color: #0a192f;
+    color: #8892b0;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .main-container {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .container {
+    background-color: rgba(16, 32, 64, 0.8);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    flex: 2;
+  }
+  
+  .sidebar {
+    background-color: rgba(16, 32, 64, 0.8);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    flex: 1;
+  }
+  
+  h2, h3, h4 {
+    color: #64ffda;
+    margin-bottom: 1rem;
+  }
+  
+  table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    width: 100%;
+  }
+  
+  th, td {
+    padding: 0.75rem;
+    text-align: left;
+  }
+  
+  th {
+    background-color: rgba(100, 255, 218, 0.1);
+    font-weight: bold;
+    border-radius: 5px 0 0 5px;
+  }
+  
+  td {
+    background-color: rgba(136, 146, 176, 0.1);
+    border-radius: 0 5px 5px 0;
+  }
+  
+  input[type="text"], select {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: rgba(16, 32, 64, 0.8);
+    border: 1px solid #64ffda;
+    border-radius: 4px;
+    color: #8892b0;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: #64ffda;
+    box-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
+  }
+  
+  .button-container {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+  
+  .predict-button {
+    background-color: #64ffda;
+    border: none;
+    color: #0a192f;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1rem;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  
+  .predict-button:hover {
+    background-color: #4cccb0;
+    box-shadow: 0 0 15px rgba(100, 255, 218, 0.7);
+  }
+  
+  #result {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #64ffda;
+  }
+  
+  .loading {
+    display: none;
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #64ffda;
+    border-top: 2px solid #0a192f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .sidebar input[type="text"], .sidebar button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  #mortgage_result {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #64ffda;
+  }
+  
+  #unit_price {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #64ffda;
+    margin-bottom: 15px;
+  }
+  
+  .inline-inputs {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .inline-inputs select {
+    flex: 1;
+  }
+  
+  #price-chart {
+    width: 100%;
+    height: 200px;
+    margin-top: 20px;
+  }
+  
+  .fun-fact {
+    background-color: rgba(100, 255, 218, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    font-style: italic;
+    color: #64ffda;
+  }
+  
+  .required::after {
+    content: " *";
+    color: #ff6b6b;
+  }
+  
+  .background {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30vh;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2364ffda" fill-opacity="0.2" d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,224C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    background-repeat: no-repeat;
+    background-size: cover;
+    z-index: -1;
+  }
+  
+  </style></head>
+  <body>
+      <div class="background"></div>
+      <div class="main-container">
+        <div class="container">
+          <h2>台中市南區房價預測 - 智能科技版</h2>
+      
+          <form method="post" id="prediction-form">
+              <input type="hidden" name="csrfmiddlewaretoken" value="JeU2ighPkkbtzz6yBUnd8I0lPxd9aLprO77dFiUs0vzuLsJgiJzxfHID4G3fB9o3">
+              <table>
+                <tr>
+                  <th>屋齡</th>
+                  <td><input type="text" name="屋齡" id="house_age" onkeydown="focusNext(event, 'area_ping')" placeholder="請輸入年數" /></td>
+                </tr>
+                <tr>
+                  <th>面積 (坪)</th>
+                  <td><input type="text" name="面積_坪" id="area_ping" onkeydown="focusNext(event, 'elevator')" placeholder="請輸入坪數" /></td>
+                </tr>
+                <tr>
+                  <th>電梯</th>
+                  <td>
+                    <select name="電梯" id="elevator" onkeydown="focusNext(event, 'manager')">
+                      <option value="不限">不限</option>
+                      <option value="有">有</option>
+                      <option value="無">無</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>管理員</th>
+                  <td>
+                    <select name="管理員" id="manager" onkeydown="focusNext(event, 'parking_spaces')">
+                      <option value="不限">不限</option>
+                      <option value="有">有</option>
+                      <option value="無">無</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>車位</th>
+                  <td>
+                    <select name="車位" id="parking_spaces" onkeydown="focusNext(event, 'floor')">
+                      <option value="不限">不限</option>
+                      <option value="有">有</option>
+                      <option value="無">無</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>樓別/樓高</th>
+                  <td class="inline-inputs">
+                    <select name="樓別" id="floor" onkeydown="focusNext(event, 'total_floors')">
+                      <option value="不限">不限</option>
+                      <option value="1">1 (未列分層)</option>
+                      <option value="2">2 (低層1-5樓)</option>
+                      <option value="3">3 (中層6-15樓)</option>
+                      <option value="4">4 (高層16樓之上)</option>
+                    </select>
+                    <select name="樓高" id="total_floors" onkeydown="focusNext(event, 'rooms')">
+                      <option value="不限">不限</option>
+                      <option value="0">0 (低層1-5樓)</option>
+                      <option value="1">1 (中層6-15樓)</option>
+                      <option value="2">2 (高層16樓之上)</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="required">房/廳/衛</th>
+                  <td class="inline-inputs">
+                    <input type="text" name="房" id="rooms" placeholder="房" onkeydown="focusNext(event, 'living_rooms')" required />
+                    <input type="text" name="廳" id="living_rooms" placeholder="廳" onkeydown="focusNext(event, 'bathrooms')" />
+                    <input type="text" name="衛" id="bathrooms" placeholder="衛" onkeydown="focusNext(event, 'building_type')" />
+                  </td>
+                </tr>
+                <tr>
+                  <th>建物類型</th>
+                  <td>
+                    <select name="建物類型" id="building_type" onkeydown="focusNext(event, 'usage')">
+                      <option value="不限">不限</option>
+                      <option value="住宅大楼">住宅大楼</option>
+                      <option value="公寓">公寓</option>
+                      <option value="套房">套房</option>
+                      <option value="華夏">華夏</option>
+                      <option value="透天厝">透天厝</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>用途</th>
+                  <td>
+                    <select name="用途" id="usage" onkeydown="focusNext(event, 'predicted_year')">
+                      <option value="不限">不限</option>
+                      <option value="住商用">住商用</option>
+                      <option value="住家用">住家用</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="required">預計年度(民國)</th>
+                  <td><input type="text" name="預計年度" id="predicted_year" onkeydown="focusNext(event, '')" placeholder="請輸入預計年度" required /></td>
+                </tr>
+              </table>
+      
+              <div class="button-container">
+                <button type="button" class="predict-button" onclick="predictPrice()">智能預測房價</button>
+              </div>
+      
+              <div id="result"></div>
+              <div class="loading" id="loading"></div>
+          </form>
+        </div>
+      
+        <div class="sidebar">
+          <h3>智能房價分析</h3>
+          <p>運用AI技術，為您提供精準的房價預測</p>
+          
+          <div class="fun-fact">
+            智能提醒：台中市南區環境優美，生活機能完善，交通便利，未來發展潛力大，是理想的居住地。
+          </div>
+  
+          <h4>預計單價 (萬/坪)</h4>
+          <div id="unit_price">-</div>
+        
+          <h4>智能房貸試算</h4>
+          <input type="text" id="loan_amount" placeholder="貸款金額 (萬)" />
+          <input type="text" id="loan_years" placeholder="貸款年限" />
+          <input type="text" id="interest_rate" placeholder="年利率 (%)" />
+          <button onclick="calculateMortgage()" class="predict-button">計算每月還款</button>
+          <div id="mortgage_result"></div>
+  
+          <h4>未來房價趨勢預測</h4>
+          <div id="price-chart"></div>
+        </div>
+      </div>
+      
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+      let priceChart;
+  
+      function focusNext(event, nextFieldId) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const nextElement = document.getElementById(nextFieldId);
+          if (nextElement) {
+            nextElement.focus();
+          } else {
+            predictPrice();
+          }
+        }
+      }
+      
+      function predictPrice() {
+        if (!validateForm()) {
+          alert('請填寫所有必填欄位');
+          return;
+        }
+  
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        
+        loading.style.display = 'block';
+        result.textContent = '';
+      
+        // Collect input data
+        const inputData = {
+          house_age: document.getElementById('house_age').value,
+          area_ping: document.getElementById('area_ping').value,
+          elevator: document.getElementById('elevator').value,
+          manager: document.getElementById('manager').value,
+          parking_spaces: document.getElementById('parking_spaces').value,
+          floor: document.getElementById('floor').value,
+          total_floors: document.getElementById('total_floors').value,
+          rooms: document.getElementById('rooms').value,
+          living_rooms: document.getElementById('living_rooms').value,
+          bathrooms: document.getElementById('bathrooms').value,
+          building_type: document.getElementById('building_type').value,
+          usage: document.getElementById('usage').value,
+          predicted_year: document.getElementById('predicted_year').value
+        };
+      
+        // Simulate API call with setTimeout
+        setTimeout(() => {
+          // Mock prediction calculation
+          const basePrice = 500000; // Base price per ping
+          const areaPing = parseFloat(inputData.area_ping) || 0;
+          const houseAge = parseInt(inputData.house_age) || 0;
+          const ageFactor = Math.max(0.7, 1 - (houseAge * 0.01)); // Decrease 1% per year, minimum 70%
+          
+          let predictedPrice = basePrice * areaPing * ageFactor;
+          
+          // Apply some basic adjustments based on other factors
+          if (inputData.elevator === "有") predictedPrice *= 1.1;
+          if (inputData.manager === "有") predictedPrice *= 1.05;
+          if (inputData.parking_spaces === "有") predictedPrice *= 1.08;
+          if (inputData.building_type === "住宅大楼") predictedPrice *= 1.2;
+          if (inputData.usage === "住商用") predictedPrice *= 1.15;
+      
+          // Adjust based on floor level
+          const floorLevel = parseInt(inputData.floor);
+          if (floorLevel === 2) predictedPrice *= 1.05;
+          else if (floorLevel === 3) predictedPrice *= 1.1;
+          else if (floorLevel === 4) predictedPrice *= 1.15;
+      
+          // Format the result
+          const formattedPrice = new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(predictedPrice);
+          
+          loading.style.display = 'none';
+          result.innerHTML = `預測房價: <span style="color: #64ffda; font-size: 1.2em;">${formattedPrice}</span>`;
+      
+          // Update unit price
+          const unitPrice = (predictedPrice / areaPing / 10000).toFixed(2);
+          document.getElementById('unit_price').textContent = `${unitPrice} 萬/坪`;
+  
+          // Update price trend chart
+          updatePriceTrendChart(predictedPrice);
+        }, 2000); // Simulate 2 second delay for API call
+      }
+      
+      function calculateMortgage() {
+        const loanAmount = parseFloat(document.getElementById('loan_amount').value) * 10000; // Convert from 萬 to 元
+        const loanYears = parseFloat(document.getElementById('loan_years').value);
+        const interestRate = parseFloat(document.getElementById('interest_rate').value) / 100 / 12;
+        const totalPayments = loanYears * 12;
+      
+        if (loanAmount && loanYears && interestRate) {
+          const monthlyPayment = (loanAmount * interestRate * Math.pow(1 + interestRate, totalPayments)) / (Math.pow(1 + interestRate, totalPayments) - 1);
+          const formattedPayment = new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(monthlyPayment);
+          document.getElementById('mortgage_result').innerHTML = `每月還款: <span style="color: #64ffda;">${formattedPayment}</span>`;
+        } else {
+          document.getElementById('mortgage_result').textContent = '請輸入完整的貸款信息';
+        }
+      }
+  
+      function updatePriceTrendChart(currentPrice) {
+        const ctx = document.getElementById('price-chart').getContext('2d');
+        
+        // Generate mock data for price trend
+        const labels = ['1年前', '現在', '1年後', '2年後', '3年後'];
+        const data = [
+          currentPrice * 0.95,
+          currentPrice,
+          currentPrice * 1.03,
+          currentPrice * 1.06,
+          currentPrice * 1.09
+        ];
+  
+        if (priceChart) {
+          priceChart.destroy();
+        }
+  
+        priceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: '預測房價趨勢',
+              data: data,
+              borderColor: '#64ffda',
+              backgroundColor: 'rgba(100, 255, 218, 0.1)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: false,
+                grid: {
+                  color: 'rgba(100, 255, 218, 0.1)'
+                },
+                ticks: {
+                  color: '#8892b0'
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(100, 255, 218, 0.1)'
+                },
+                ticks: {
+                  color: '#8892b0'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#8892b0'
+                }
+              }
+            }
+          }
+        });
+      }
+  
+      function validateForm() {
+        const rooms = document.getElementById('rooms').value;
+        const predictedYear = document.getElementById('predicted_year').value;
+        return rooms !== '' && predictedYear !== '';
+      }
+  
+      // Initialize the chart with dummy data
+      updatePriceTrendChart(10000000);
+      </script>
+  </body></html>

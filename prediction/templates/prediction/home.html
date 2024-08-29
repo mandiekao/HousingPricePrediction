@@ -1,0 +1,164 @@
+<html>
+  <head>
+    {% comment %}
+    <base href="https://taichung-housing-prediction.ai/" />
+    {% endcomment %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>台中市南區房價預測 </title>
+    {% load static %}
+    <link href="{% static 'css/main.css' %}" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+  </head>
+  <body>
+    <div class="background"></div>
+    <div class="main-container">
+      <div class="container">
+        <h2>台中市南區房價預測</h2>
+
+        <form method="post" id="prediction-form">
+          <input type="hidden" name="csrfmiddlewaretoken" value="JeU2ighPkkbtzz6yBUnd8I0lPxd9aLprO77dFiUs0vzuLsJgiJzxfHID4G3fB9o3" />
+          <table>
+            <tr>
+              <th class="required">屋齡</th>
+              <td><input type="text" name="屋齡" id="house_age" onkeydown="focusNext(event, 'area_ping')" placeholder="請輸入年數" required/></td>
+            </tr>
+            <tr>
+              <th class="required">面積 (坪)</th>
+              <td><input type="text" name="面積_坪" id="area_ping" onkeydown="focusNext(event, 'elevator')" placeholder="請輸入坪數" /></td>
+            </tr>
+            <tr>
+              <th>電梯</th>
+              <td>
+                <select name="電梯" id="elevator" onkeydown="focusNext(event, 'manager')">
+    
+                  <option value="有">有</option>
+                  <option value="無">無</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>管理員</th>
+              <td>
+                <select name="管理員" id="manager" onkeydown="focusNext(event, 'parking_spaces')">
+                  
+                  <option value="有">有</option>
+                  <option value="無">無</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>車位</th>
+              <td>
+                <select name="車位" id="parking_spaces" onkeydown="focusNext(event, 'floor')">
+                  <option value="有">有</option>
+                  <option value="無">無</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>樓別/樓高</th>
+              <td class="inline-inputs">
+                <select name="樓別" id="floor" onkeydown="focusNext(event, 'total_floors')">
+                  <option value="1">1 (未列分層)</option>
+                  <option value="2">2 (低層1-5樓)</option>
+                  <option value="3">3 (中層6-15樓)</option>
+                  <option value="4">4 (高層16樓之上)</option>
+                </select>
+                <select name="樓高" id="total_floors" onkeydown="focusNext(event, 'rooms')">
+                  <option value="0">0 (低層1-5樓)</option>
+                  <option value="1">1 (中層6-15樓)</option>
+                  <option value="2">2 (高層16樓之上)</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>房/廳/衛</th>
+              <td class="inline-inputs">
+                <input type="text" name="房" id="rooms" placeholder="房" onkeydown="focusNext(event, 'living_rooms')" />
+                <input type="text" name="廳" id="living_rooms" placeholder="廳" onkeydown="focusNext(event, 'bathrooms')" />
+                <input type="text" name="衛" id="bathrooms" placeholder="衛" onkeydown="focusNext(event, 'building_type')" />
+              </td>
+            </tr>
+            <tr>
+              <th>建物類型</th>
+              <td>
+                <select name="建物類型" id="building_type" onkeydown="focusNext(event, 'usage')">
+                  
+                  <option value="1">住宅大楼</option>
+                  <option value="2">公寓</option>
+                  <option value="3">套房</option>
+                  <option value="4">華夏</option>
+                  <option value="5">透天厝</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>用途</th>
+              <td>
+                <select name="用途" id="usage" onkeydown="focusNext(event, 'predicted_year')">
+                  
+                  <option value="1">住商用</option>
+                  <option value="2">住家用</option>
+                  <option value="3">商業用</option>
+                  <option value="4">辦公用</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th c>預計年度(民國)</th>
+              <td><input type="text" name="預計年度" id="predicted_year" onkeydown="focusNext(event, '')" placeholder="請輸入預計年度"  /></td>
+            </tr>
+          </table>
+
+          <div class="button-container">
+            <button type="button" class="predict-button" onclick="predictPrice()">智能預測房價</button>
+          </div>
+
+          <div id="result"></div>
+          <div class="loading" id="loading"></div>
+        </form>
+      </div>
+
+      <div class="sidebar">
+        <h3>智能房價分析</h3>
+        <p>運用AI技術，為您提供精準的房價預測</p>
+
+        <div class="fun-fact">智能提醒：台中市南區環境優美，生活機能完善，交通便利，未來發展潛力大，是理想的居住地。</div>
+
+        <h4>預計單價 (萬/坪)</h4>
+        <div id="unit_price">-</div>
+
+        {% comment %} <h4>智能房貸試算</h4>
+        <input type="text" id="loan_amount" placeholder="貸款金額 (萬)" />
+        <input type="text" id="loan_years" placeholder="貸款年限" />
+        <input type="text" id="interest_rate" placeholder="年利率 (%)" />
+        <button onclick="calculateMortgage()" class="predict-button">計算每月還款</button>
+        <div id="mortgage_result"></div> {% endcomment %}
+
+        <h4>智能房貸試算</h4>
+        <div class="mortgage-input">
+            <label for="loan_amount">貸款金額(萬)</label>
+            <input type="text" id="loan_amount" placeholder="請輸入貸款金額" oninput="calculateMortgage()">
+        </div>
+        <div class="mortgage-input">
+            <label for="loan_years">貸款年限</label>
+            <input type="text" id="loan_years" placeholder="貸款年限" value="20" oninput="calculateMortgage()">
+        </div>
+        <div class="mortgage-input">
+            <label for="interest_rate">年利率(%)</label>
+            <input type="text" id="interest_rate" placeholder="年利率" value="2.3" oninput="calculateMortgage()">
+        </div>
+        <button onclick="calculateMortgage()" class="predict-button">計算每月還款</button>
+        <div id="mortgage_result"></div>
+
+        <h4>未來房價趨勢預測</h4>
+        {% comment %} <div id="price-chart"></div> {% endcomment %}
+        <canvas id='price-chart'> </canvas>
+      </div>
+    </div>
+  </body>
+</html>
